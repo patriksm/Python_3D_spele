@@ -10,6 +10,8 @@ player = FirstPersonController(
 
 sky = Sky()
 
+window.fullscreen = True
+
 def input(key):
     if(key == 'q'):
         quit()
