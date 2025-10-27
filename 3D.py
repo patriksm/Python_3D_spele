@@ -26,6 +26,12 @@ walk = Audio(
     autoplay = False
 )
 
+jump = Audio(
+    'assets\jumping.mp3',
+    loop = False,
+    autoplay = False
+)
+
 def update():
     walking = held_keys['a'] or held_keys['d'] or held_keys['w'] or held_keys['s']
     if walking:
@@ -38,5 +44,8 @@ def update():
 def input(key):
     if(key == 'q'):
         quit()
+    if(key == 'space'):
+        if not jump.playing:
+            jump.play()
 
 app.run()
