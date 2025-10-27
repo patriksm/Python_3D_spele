@@ -11,8 +11,17 @@ ground = Entity(
     scale = (100, 1, 100)
 )
 
-player = FirstPersonController(
+siena_prieksa = Entity(
+    model = 'cube',
+    position = (0, 5, 50),
+    scale = (100, 10, 1),
+    collider = 'box',
+    texture = 'textures\siena_prieksa.jpg', 
+    texture_scale=(3.6,0.72)
+)
 
+player = FirstPersonController(
+    speed = 15
 )
 player.cursor.visible  = True
 
