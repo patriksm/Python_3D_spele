@@ -17,7 +17,7 @@ siena_prieksa = Entity(
     scale = (100, 10, 1),
     collider = 'box',
     texture = 'textures\siena_prieksa.jpg', 
-    texture_scale=(3.6,0.72)
+    texture_scale=(3.6,0.72),
 )
 
 player = FirstPersonController(
@@ -27,7 +27,7 @@ player.cursor.visible  = True
 
 sky = Sky()
 
-window.fullscreen = True
+window.fullscreen = False
 
 walk = Audio(
     'assets\walking.mp3',
