@@ -37,6 +37,14 @@ tree = Entity(
     scale=(3, 2, 1),
 )
 
+# --- House ---
+house = Entity(
+    model='wooden_cottage_house_psx.glb',
+    position=(-20, 0, -25),
+    collider='box',
+    scale=(70, 50, 70),
+)
+
 # --- Blocks (moving platforms) ---
 blocks = []  # use plural to avoid confusion
 dirs = []
@@ -77,7 +85,7 @@ player.cursor.visible = False
 sky = Sky()
 skybox = Entity(
     model='cube',
-    texture='night',
+    texture='skybox',
     scale=100,
     double_sided=True
 )
