@@ -27,6 +27,13 @@ masina = Entity(
     scale = (2, 2, 2),
 )
 
+masina = Entity(
+    model = 'mapleTree.glb',
+    position = (0, 0, 25),
+    collider = 'box',
+    scale = (0.1, 0.1, 0.1),
+)
+
 player = FirstPersonController(
     speed = 15
 )
