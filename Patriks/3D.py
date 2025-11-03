@@ -1,3 +1,4 @@
+from random import uniform
 from ursina import *
 from ursina.prefabs.first_person_controller \
 import FirstPersonController
@@ -33,6 +34,20 @@ masina = Entity(
     collider = 'box',
     scale = (0.1, 0.1, 0.1),
 )
+
+bloki = []
+for i in range(10):
+    r = 0
+    r = uniform(-2, 2)
+    bloks = Entity(
+        model = 'cube',
+        position = (10, 1 + i, 10 + 5*i),
+        texture = 'white_cube',
+        collider = 'box',
+        scale = (5, 0.5, 5)
+    )
+    bloki.append(bloks)
+
 
 player = FirstPersonController(
     speed = 15
