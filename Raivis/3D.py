@@ -32,9 +32,9 @@ car = Entity(
 # --- Tree ---
 tree = Entity(
     model='linden_tree.glb',
-    position=(0, 0, 10),
+    position=(36, 0, 36),
     collider='box',
-    scale=(2, 2, 2),
+    scale=(3, 2, 1),
 )
 
 # --- Blocks (moving platforms) ---
