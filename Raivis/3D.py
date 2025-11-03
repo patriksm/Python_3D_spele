@@ -5,9 +5,9 @@ from ursina.prefabs.first_person_controller import FirstPersonController
 app = Ursina()
 
 # --- Settings ---
-wall_height = 10
+wall_height = 6
 ground_size = 100
-wall_texture = 'textures/rough_plaster_brick_02_diff_2k.jpg'
+wall_texture = 'Bricks052_2K-JPG/Bricks052_2K-JPG_Color.jpg'
 
 # --- Audio ---
 walk = Audio('walking-sound-effect.mp3', volume=1, autoplay=False, loop=False)
@@ -16,9 +16,9 @@ jump_sound = Audio('jumplanding.mp3', volume=1, autoplay=False, loop=False)
 # --- Ground ---
 ground = Entity(
     model='plane',
-    texture='grass',
+    texture='Grass004_1K-JPG/Grass004_1K-JPG_Color.jpg',
     collider='mesh',
-    scale=(ground_size, 1, ground_size)
+    scale=(ground_size, 1000, ground_size)
 )
 
 # --- Car ---
