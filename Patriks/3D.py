@@ -23,14 +23,14 @@ siena_prieksa = Entity(
 
 masina = Entity(
     model = 'redCar.glb',
-    position = (0, 0, 10),
+    position = (-40, 0, 10),
     collider = 'box',
     scale = (2, 2, 2),
 )
 
 masina = Entity(
     model = 'mapleTree.glb',
-    position = (0, 0, 25),
+    position = (-40, 0, 25),
     collider = 'box',
     scale = (0.1, 0.1, 0.1),
 )
@@ -71,6 +71,14 @@ jump = Audio(
 )
 
 def update():
+    i = 0
+    dir = 1;
+    for bloks in bloki:
+        bloks.x += dir*time.dt;
+        if(bloks.x > 15):
+            dir *= -1;
+        elif(bloks.x < 5):
+            bloks.x *= -1
     walking = held_keys['a'] or held_keys['d'] or held_keys['w'] or held_keys['s']
     if walking:
         if not walk.playing: 
