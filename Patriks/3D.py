@@ -20,6 +20,13 @@ siena_prieksa = Entity(
     texture_scale=(3.6,0.72),
 )
 
+masina = Entity(
+    model = 'redCar.glb',
+    position = (0, 0, 10),
+    collider = 'box',
+    scale = (2, 2, 2),
+)
+
 player = FirstPersonController(
     speed = 15
 )
