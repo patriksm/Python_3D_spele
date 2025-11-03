@@ -1,18 +1,17 @@
+from random import uniform
 from ursina import *
 from ursina.prefabs.first_person_controller import FirstPersonController
 
 app = Ursina()
 
 # --- Settings ---
-wall_height = 6
-ground_size = 40
-# make sure the file exists!
-wall_texture = 'rough_plaster_brick_02_2k.blend/textures/rough_plaster_brick_02_diff_2k.jpg'
-
+wall_height = 10
+ground_size = 100
+wall_texture = 'textures/rough_plaster_brick_02_diff_2k.jpg'
 
 # --- Audio ---
 walk = Audio('walking-sound-effect.mp3', volume=1, autoplay=False, loop=False)
-jump = Audio('jumplanding.mp3', volume=1, autoplay=False, loop=False)
+jump_sound = Audio('jumplanding.mp3', volume=1, autoplay=False, loop=False)
 
 # --- Ground ---
 ground = Entity(
@@ -22,30 +21,52 @@ ground = Entity(
     scale=(ground_size, 1, ground_size)
 )
 
+# --- Car ---
+car = Entity(
+    model='transformers_rotf_psp_ratchet.glb',
+    position=(-10, 0.3, -10),
+    collider='box',
+    scale=(1, 1, 1)
+)
+
+# --- Tree ---
+tree = Entity(
+    model='linden_tree.glb',
+    position=(0, 0, 10),
+    collider='box',
+    scale=(2, 2, 2),
+)
+
+# --- Blocks (moving platforms) ---
+blocks = []  # use plural to avoid confusion
+dirs = []
+for i in range(10):
+    b = Entity(
+        model='cube',
+        position=(10, 1 + i, 10 + 5*i),
+        texture='white_cube',
+        collider='box',
+        scale=(5, 0.5, 5)
+    )
+    blocks.append(b)
+    dirs.append(uniform(-1, 1))
+
 # --- Walls ---
 half = ground_size / 2
 wall_thickness = 1
-
 walls = [
-    # Front wall (in front of the player, so negative Z)
     Entity(model='cube', position=(0, wall_height/2, -half),
            scale=(ground_size, wall_height, wall_thickness),
            collider='box', texture=wall_texture, texture_scale=(5, 2)),
-
-    # Back wall
     Entity(model='cube', position=(0, wall_height/2, half),
            scale=(ground_size, wall_height, wall_thickness),
            collider='box', texture=wall_texture, texture_scale=(5, 2)),
-
-    # Left wall
     Entity(model='cube', position=(-half, wall_height/2, 0),
            scale=(wall_thickness, wall_height, ground_size),
            collider='box', texture=wall_texture, texture_scale=(5, 2)),
-
-    # Right wall
     Entity(model='cube', position=(half, wall_height/2, 0),
            scale=(wall_thickness, wall_height, ground_size),
-           collider='box', texture=wall_texture, texture_scale=(5, 2)),
+           collider='box', texture=wall_texture, texture_scale=(5, 2))
 ]
 
 # --- Player ---
@@ -55,35 +76,47 @@ player.cursor.visible = False
 # --- Sky ---
 sky = Sky()
 skybox = Entity(
-    model='eclipse_skybox',
-    texture='eclipse_skybox_texture',
+    model='cube',
+    texture='night',
     scale=100,
     double_sided=True
 )
 
-
 window.fullscreen = False
 
-# --- Update ---
+# --- Variables for jump sound ---
+was_on_ground = True  # track if player was grounded in previous frame
 
 
+# --- Update loop ---
 def update():
+    global was_on_ground
+
+    # Move blocks
+    for i, b in enumerate(blocks):
+        b.x += dirs[i] * time.dt * 3
+        if b.x > 15 or b.x < 5:
+            dirs[i] *= -1
+
+    # Play walking sound
     walking = held_keys['a'] or held_keys['d'] or held_keys['w'] or held_keys['s']
-    if walking:
-        if not walk.playing:
-            walk.play()
-    else:
-        if walk.playing:
-            walk.stop()
+    if walking and player.grounded and not walk.playing:
+        walk.play()
+    elif (not walking or not player.grounded) and walk.playing:
+        walk.stop()
+
+    # Detect landing to play jump sound
+    if player.grounded and not was_on_ground:
+        jump_sound.play()
+
+    was_on_ground = player.grounded  # update state
+
 
 # --- Input ---
-
-
 def input(key):
     if key == 'q':
         quit()
-    elif key == 'space':
-        jump.play()
+    # no need to play jump sound here anymore
 
 
 app.run()
