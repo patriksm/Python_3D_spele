@@ -85,7 +85,7 @@ player.cursor.visible = False
 sky = Sky()
 skybox = Entity(
     model='sphere',
-    texture='NightSkyHDRI003_4K/NightSkyHDRI003_4K_TONEMAPPED.jpg',
+    texture='NightSkyHDRI008_4K/NightSkyHDRI008_4K_TONEMAPPED.jpg',
     scale=1000,
     double_sided=True
 )
