@@ -74,9 +74,9 @@ def update():
     i = 0
     dir = 1;
     for bloks in bloki:
-        bloks.x += dir*time.dt;
+        bloks.x += dir*time.dt
         if(bloks.x > 15):
-            dir *= -1;
+            dir *= -1
         elif(bloks.x < 5):
             bloks.x *= -1
     walking = held_keys['a'] or held_keys['d'] or held_keys['w'] or held_keys['s']
