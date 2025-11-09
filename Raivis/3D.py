@@ -5,8 +5,8 @@ from ursina.prefabs.first_person_controller import FirstPersonController
 app = Ursina()
 
 # --- Settings ---
-wall_height = 6
-ground_size = 120
+wall_height = 8
+ground_size = 100
 wall_texture = 'Bricks052_2K-JPG/Bricks052_2K-JPG_Color.jpg'
 
 # --- Audio ---
@@ -25,7 +25,7 @@ ground = Entity(
 # --- Car ---
 car = Entity(
     model='transformers_rotf_psp_ratchet.glb',
-    position=(-10, 0.3, -10),
+    position=(-20, 0.3, 18),
     collider='box',
     scale=(1, 1, 1)
 )
@@ -66,17 +66,26 @@ wall_thickness = 1
 walls = [
     Entity(model='cube', position=(0, wall_height/2, -half),
            scale=(ground_size, wall_height, wall_thickness),
-           collider='box', texture=wall_texture, texture_scale=(30, 2.2)),
+           collider='box', texture=wall_texture, texture_scale=(30, 2.5)),
     Entity(model='cube', position=(0, wall_height/2, half),
            scale=(ground_size, wall_height, wall_thickness),
-           collider='box', texture=wall_texture, texture_scale=(30, 2.2)),
+           collider='box', texture=wall_texture, texture_scale=(30, 2.5)),
     Entity(model='cube', position=(-half, wall_height/2, 0),
            scale=(wall_thickness, wall_height, ground_size),
-           collider='box', texture=wall_texture, texture_scale=(30, 2.2)),
+           collider='box', texture=wall_texture, texture_scale=(30, 2.5)),
     Entity(model='cube', position=(half, wall_height/2, 0),
            scale=(wall_thickness, wall_height, ground_size),
-           collider='box', texture=wall_texture, texture_scale=(30, 2.2))
+           collider='box', texture=wall_texture, texture_scale=(30, 2.5))
 ]
+# --- Blocks ---
+for i in range(30):
+    Entity(model='cube', origin_y=-.4, scale=2, texture='brick', texture_scale=(3, 4),
+           x=uniform(-16, 40),
+           z=uniform(-16, 40) - 30,
+           collider='box',
+           scale_y=uniform(3, 4),
+           color=color.hsv(0, 0, uniform(.9, 1))
+           )
 
 # --- Player ---
 player = FirstPersonController(speed=20)
@@ -116,7 +125,9 @@ def update():
 
     # Landing sound
     if player.grounded and not was_on_ground:
-        jump_sound.play()
+        jump_sound.play()  # play on landing
+    if 'space' and player.grounded:
+        jump_sound.play()  # play on jump
 
     was_on_ground = player.grounded
 
