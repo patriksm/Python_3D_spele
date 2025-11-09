@@ -35,13 +35,30 @@ tree = Entity(
     model='linden_tree.glb',
     position=(39, 0, 39),
     collider='box',
-    scale=(3, 2, 1),
+    scale=(3, 2, 3),
 )
-
+tree = Entity(
+    model='linden_tree.glb',
+    position=(-39, 0, -39),
+    collider='box',
+    scale=(3, 2, 3),
+)
+tree = Entity(
+    model='linden_tree.glb',
+    position=(39, 0, -39),
+    collider='box',
+    scale=(3, 2, 3),
+)
+tree = Entity(
+    model='linden_tree.glb',
+    position=(-39, 0, 39),
+    collider='box',
+    scale=(3, 2, 3),
+)
 # --- House ---
 house = Entity(
     model='wooden_cottage_house_psx.glb',
-    position=(-20, 0, -25),
+    position=(-20, 0, 0),
     collider='box',
     scale=(70, 50, 70),
 )
@@ -52,7 +69,7 @@ dirs = []
 for i in range(10):
     b = Entity(
         model='cube',
-        position=(10, 1 + i, 10 + 5*i),
+        position=(8, 1 + i, 8 + 5*i),
         texture='white_cube',
         collider='box',
         scale=(5, 0.5, 5)
@@ -78,10 +95,10 @@ walls = [
            collider='box', texture=wall_texture, texture_scale=(30, 2.5))
 ]
 # --- Blocks ---
-for i in range(30):
+for i in range(25):
     Entity(model='cube', origin_y=-.4, scale=2, texture='brick', texture_scale=(3, 4),
-           x=uniform(-16, 40),
-           z=uniform(-16, 40) - 30,
+           x=uniform(-16, 35),
+           z=uniform(-13, 35) - 30,
            collider='box',
            scale_y=uniform(3, 4),
            color=color.hsv(0, 0, uniform(.9, 1))
