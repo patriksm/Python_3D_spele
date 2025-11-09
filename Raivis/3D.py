@@ -6,7 +6,7 @@ app = Ursina()
 
 # --- Settings ---
 wall_height = 6
-ground_size = 100
+ground_size = 120
 wall_texture = 'Bricks052_2K-JPG/Bricks052_2K-JPG_Color.jpg'
 
 # --- Audio ---
@@ -16,9 +16,10 @@ jump_sound = Audio('jumplanding.mp3', volume=1, autoplay=False, loop=False)
 # --- Ground ---
 ground = Entity(
     model='plane',
-    texture='Grass004_1K-JPG/Grass004_1K-JPG_Color.jpg',
+    texture='Grass008_2K-JPG/Grass008_2K-JPG_Color.jpg',
     collider='mesh',
-    scale=(ground_size, 1000, ground_size)
+    scale=(ground_size, 1, ground_size),
+    texture_scale=(ground_size/5, ground_size/5)
 )
 
 # --- Car ---
@@ -32,7 +33,7 @@ car = Entity(
 # --- Tree ---
 tree = Entity(
     model='linden_tree.glb',
-    position=(36, 0, 36),
+    position=(39, 0, 39),
     collider='box',
     scale=(3, 2, 1),
 )
@@ -45,8 +46,8 @@ house = Entity(
     scale=(70, 50, 70),
 )
 
-# --- Blocks (moving platforms) ---
-blocks = []  # use plural to avoid confusion
+# --- Moving Blocks ---
+blocks = []
 dirs = []
 for i in range(10):
     b = Entity(
@@ -65,38 +66,38 @@ wall_thickness = 1
 walls = [
     Entity(model='cube', position=(0, wall_height/2, -half),
            scale=(ground_size, wall_height, wall_thickness),
-           collider='box', texture=wall_texture, texture_scale=(5, 2)),
+           collider='box', texture=wall_texture, texture_scale=(30, 2.2)),
     Entity(model='cube', position=(0, wall_height/2, half),
            scale=(ground_size, wall_height, wall_thickness),
-           collider='box', texture=wall_texture, texture_scale=(5, 2)),
+           collider='box', texture=wall_texture, texture_scale=(30, 2.2)),
     Entity(model='cube', position=(-half, wall_height/2, 0),
            scale=(wall_thickness, wall_height, ground_size),
-           collider='box', texture=wall_texture, texture_scale=(5, 2)),
+           collider='box', texture=wall_texture, texture_scale=(30, 2.2)),
     Entity(model='cube', position=(half, wall_height/2, 0),
            scale=(wall_thickness, wall_height, ground_size),
-           collider='box', texture=wall_texture, texture_scale=(5, 2))
+           collider='box', texture=wall_texture, texture_scale=(30, 2.2))
 ]
 
 # --- Player ---
-player = FirstPersonController(speed=15)
+player = FirstPersonController(speed=20)
 player.cursor.visible = False
+editor_camera = EditorCamera(enabled=False, ignore_paused=True)
 
-# --- Sky ---
-sky = Sky()
+# --- Custom Sky ---
 skybox = Entity(
     model='sphere',
     texture='NightSkyHDRI008_4K/NightSkyHDRI008_4K_TONEMAPPED.jpg',
     scale=1000,
     double_sided=True
-)
 
+)
 window.fullscreen = False
 
-# --- Variables for jump sound ---
-was_on_ground = True  # track if player was grounded in previous frame
+# --- Jump Tracking ---
+was_on_ground = player.grounded
 
 
-# --- Update loop ---
+# --- Update Loop ---
 def update():
     global was_on_ground
 
@@ -106,25 +107,25 @@ def update():
         if b.x > 15 or b.x < 5:
             dirs[i] *= -1
 
-    # Play walking sound
+    # Walking sound
     walking = held_keys['a'] or held_keys['d'] or held_keys['w'] or held_keys['s']
     if walking and player.grounded and not walk.playing:
         walk.play()
     elif (not walking or not player.grounded) and walk.playing:
         walk.stop()
 
-    # Detect landing to play jump sound
+    # Landing sound
     if player.grounded and not was_on_ground:
         jump_sound.play()
 
-    was_on_ground = player.grounded  # update state
+    was_on_ground = player.grounded
 
 
-# --- Input ---
+# --- Input Handling ---
 def input(key):
     if key == 'q':
         quit()
-    # no need to play jump sound here anymore
 
 
+# --- Start the app ---
 app.run()
