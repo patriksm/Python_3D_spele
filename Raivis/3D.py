@@ -15,10 +15,7 @@ Entity.default_shader = lit_with_shadows_shader
 
 # --- Camera & Player ---
 editor_camera = EditorCamera(enabled=False, ignore_paused=True)
-player = FirstPersonController(
-    model='cube', z=-10, color=color.orange, origin_y=-.5, speed=8, collider='box'
-)
-player.collider = BoxCollider(player, Vec3(0, 1, 0), Vec3(1, 2, 1))
+player = FirstPersonController()
 
 gun = Entity(
     model='cube',
@@ -86,6 +83,7 @@ house = Entity(
 blocks = []
 dirs = []
 for i in range(10):
+    r = uniform(-2, 2)
     b = Entity(
         model='cube',
         position=(8, 1 + i, 8 + 5 * i),
