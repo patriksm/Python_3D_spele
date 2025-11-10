@@ -131,6 +131,8 @@ for i in range(25):
 player = FirstPersonController(speed=20)
 player.cursor.visible = False
 editor_camera = EditorCamera(enabled=False, ignore_paused=True)
+collider = 'box',
+position = (0, 0, -5)
 
 # --- Skybox ---
 skybox = Entity(
@@ -258,6 +260,9 @@ def update():
         b.x += dirs[i] * time.dt * 3
         if b.x > 15 or b.x < 5:
             dirs[i] *= -1
+        if b.intersects().hit:
+            dirs[i] *= -1
+            player.y += 5 * time.dt
 
     # Walking sound
     walking = held_keys['a'] or held_keys['d'] or held_keys['w'] or held_keys['s']
