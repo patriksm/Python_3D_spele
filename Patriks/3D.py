@@ -35,21 +35,27 @@ masina = Entity(
     scale=(2, 2, 2),
 )
 bloki = []
+directions = []
 for i in range(10):
-    r = 0
     r = uniform(-2, 2)
     bloks = Entity(
         model='cube',
-        position=(10, 1 + i, 10 + 5*i),
+        position=(r, 1 + i, 1 + 5*i),
         texture='white_cube',
         collider='box',
         scale=(5, 0.5, 5)
     )
     bloki.append(bloks)
+    if r < 0:
+        directions.append(1)
+    else:
+        directions.append(-1)
 
 
 player = FirstPersonController(
-    speed=15
+    speed=15,
+    collider='box',
+    position=(40, 0, -45)
 )
 player.cursor.visible = True
 
@@ -72,13 +78,14 @@ jump = Audio(
 
 def update():
     i = 0
-    dir = 1
     for bloks in bloki:
-        bloks.x += dir*time.dt
-        if (bloks.x > 15):
-            dir *= -1
-        elif (bloks.x < 5):
-            bloks.x *= -1
+        bloks.x -= directions[i] * time.dt
+        if abs(bloks.x) > 5:
+            directions[i] *= -1
+        if bloks.intersects().hit:
+            player.x -= directions[i] * time.dt
+        i += 1
+
     walking = held_keys['a'] or held_keys['d'] or held_keys['w'] or held_keys['s']
     if walking:
         if not walk.playing:
