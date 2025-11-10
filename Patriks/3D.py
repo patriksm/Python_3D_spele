@@ -12,6 +12,37 @@ ground = Entity(
     scale=(100, 1, 100)
 )
 
+myGun = Entity(
+    color = color.gold,
+    parent = camera.ui,
+    model = 'weapon.glb',
+    position = (0.35, -0.4), 
+    rotation= (-20,-20,0),
+    scale =0.3,
+    flip_faces=True
+)
+
+class Target(Button):
+    def __init__(self, x, y, z):
+        super().__init__(
+            color = color.gold,
+            parent = scene,
+            model = 'white_cube',
+            scale = 1,
+            position = (x,y,z),
+            rotation = (0, -90, 0),
+            collider = 'mesh'
+        )
+
+num = 7
+targets = [None]*num
+for i in range(num):
+    tx = uniform(-50, 50)
+    ty = 5
+    tz = uniform(0, 50)
+    targets[i]=Target(tx, ty, tz)
+    # targets[i].animate_x(tx+100, duration=10, loop=True)
+
 siena_prieksa = Entity(
     model='cube',
     position=(0, 5, 50),
