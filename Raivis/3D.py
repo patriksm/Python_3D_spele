@@ -26,6 +26,7 @@ gun = Entity(
     color=color.red,
     on_cooldown=False
 )
+
 gun.muzzle_flash = Entity(
     parent=gun,
     z=1,
@@ -131,8 +132,6 @@ for i in range(25):
 player = FirstPersonController(speed=20)
 player.cursor.visible = False
 editor_camera = EditorCamera(enabled=False, ignore_paused=True)
-collider = 'box',
-position = (0, 0, -5)
 
 # --- Skybox ---
 skybox = Entity(
