@@ -26,11 +26,11 @@ class DamageText(Text):
             text=f"-{value}",
             color=color.red,
             position=position,
-            scale=30,
-            origin=(0, 0),
+            scale=10,
+            origin=(8, 8),
             world_parent=scene
         )
-        self.animate_position(self.position + Vec3(0, 1, 0), duration=1)
+        self.animate_position(self.position + Vec3(1, 1, 1), duration=1)
         self.fade_out(duration=1)
         destroy(self, delay=1.1)
 
@@ -60,7 +60,7 @@ class Gun(Entity):
         self._orig_rotation_z = self.rotation_z
 
         # Barrel offset relative to gun model
-        self.barrel_offset = Vec3(0.0, 0.05, 1.3)
+        self.barrel_offset = Vec3(0.9, 0.9, 2)
 
         self.muzzle_flash = Entity(
             parent=self,
@@ -142,9 +142,10 @@ ground = Entity(
 # --- Car ---
 car = Entity(
     model='transformers_rotf_psp_ratchet.glb',
-    position=(-20, 0.3, 18),
+    position=(-40, 0.3, -16),
+    rotation=(0, 88, 0),
     collider='box',
-    scale=(1, 1, 1)
+    scale=(1, .9, 1)
 )
 
 # --- Trees ---
@@ -157,26 +158,50 @@ for pos in [(39, 0, 39), (-39, 0, -39), (39, 0, -39), (-39, 0, 39)]:
         collider=None
     ))
 trees = []
-for pos in [(30, 0, 30), (-30, 0, -30), (30, 0, -30), (-30, 0, 30)]:
+for pos in [(25, 0, 43), (-23, 0, -43), (20, 0, -43), (-22, 0, 43)]:
     trees.append(Entity(
         model='spruce_trees.glb',
         position=pos,
         scale=(.4, .4, .4),
         collider=None
     ))
-
+trees = []
+for pos in [(21, 0, 25), (-18, 0, -33), (15, 0, -33), (-18, 0, 33)]:
+    trees.append(Entity(
+        model='blue_spruce_tree.glb',
+        position=pos,
+        scale=(1, 1, 1),
+        collider=None
+    ))
+trees = []
+for pos in [(-48, 0, -9), (-33, 0, -33), (-42, 0, -9), (-38, 0, -9), (-34, 0, -9)]:
+    trees.append(Entity(
+        model='real_bush.glb',
+        position=pos,
+        scale=(.03, .02, .03),
+        collider=None
+    ))
+trees = []
+for pos in [(-48, 0, -4), (-30, 0, -4), (-42, 0, 4), (-38, 0, -4), (-34, 0, 4)]:
+    trees.append(Entity(
+        model='pine_tree.glb',
+        position=pos,
+        scale=(4, 2, 4),
+        collider=None
+    ))
 
 house = Entity(
     model='wooden_cottage_house_psx.glb',
-    position=(-20, 0, 0),
-    collider='box',
+    position=(-30, 0, -26),
+    collider=None,
     scale=(70, 50, 70)
 )
 
 # --- Moving Blocks ---
 blocks = []
-dirs = []
-for i in range(10):
+block_dirs = []
+
+for i in range(9):
     b = Entity(
         model='cube',
         position=(8, 1 + i, 8 + 5 * i),
@@ -185,8 +210,9 @@ for i in range(10):
         scale=(5, 0.5, 5)
     )
     blocks.append(b)
-    dirs.append(random.uniform(-1, 1))
 
+    # block movement direction (left/right)
+    block_dirs.append(random.uniform(-0.03, 0.03))
 
 # --- Walls ---
 half = GROUND_SIZE / 2
@@ -317,17 +343,29 @@ enemies = [Enemy(x=x * 4) for x in range(4)]
 # ======================================================
 #  UPDATE LOOP
 # ======================================================
-def update():
-    global was_on_ground
 
-    # Moving blocks
-    for i, b in enumerate(blocks):
-        b.x += dirs[i] * time.dt * 3
-        if b.x > 15 or b.x < 5:
-            dirs[i] *= -1
-        if b.intersects().hit:
-            dirs[i] *= -1
-            player.y += 8 * time.dt
+def update():
+    for i, block in enumerate(blocks):
+
+        # --- Move block ---
+        block.x += block_dirs[i]
+
+        # reverse direction at limits
+        if block.x > 5:
+            block_dirs[i] = -abs(block_dirs[i])
+        if block.x < -5:
+            block_dirs[i] = abs(block_dirs[i])
+
+        # --- Check if player is standing on block ---
+        on_top = (
+            abs(player.x - block.x) < block.scale_x/2 and
+            abs(player.z - block.z) < block.scale_z/2 and
+            abs(player.y - (block.y + 0.3)) < 0.4
+        )
+
+        if on_top and player.grounded:
+            # move player together with block
+            player.x += block_dirs[i]
 
     # Walking sound
     walking = held_keys['a'] or held_keys['d'] or held_keys['w'] or held_keys['s']
@@ -338,8 +376,6 @@ def update():
 
     if player.grounded and not was_on_ground:
         jump_sound.play()
-
-    was_on_ground = player.grounded
 
     # Shooting
     if held_keys['left mouse']:
