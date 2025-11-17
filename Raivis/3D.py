@@ -153,11 +153,19 @@ for pos in [(39, 0, 39), (-39, 0, -39), (39, 0, -39), (-39, 0, 39)]:
     trees.append(Entity(
         model='linden_tree.glb',
         position=pos,
-        collider='box',
-        scale=(3, 2, 3)
+        scale=(3, 2, 3),
+        collider=None
+    ))
+trees = []
+for pos in [(30, 0, 30), (-30, 0, -30), (30, 0, -30), (-30, 0, 30)]:
+    trees.append(Entity(
+        model='spruce_trees.glb',
+        position=pos,
+        scale=(.4, .4, .4),
+        collider=None
     ))
 
-# --- House ---
+
 house = Entity(
     model='wooden_cottage_house_psx.glb',
     position=(-20, 0, 0),
