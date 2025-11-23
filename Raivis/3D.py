@@ -182,13 +182,22 @@ for pos in [(-48, 0, -9), (-33, 0, -33), (-42, 0, -9), (-38, 0, -9), (-34, 0, -9
         collider=None
     ))
 trees = []
-for pos in [(-48, 0, -4), (-30, 0, -4), (-42, 0, 4), (-38, 0, -4), (-34, 0, 4)]:
+for pos in [(-44, 0, 12), (-35, 0, -4), (-40, 0, 4), (-25, 0, 6), (-25, 0, 20)]:
     trees.append(Entity(
         model='pine_tree.glb',
         position=pos,
-        scale=(4, 2, 4),
+        scale=(5, 4, 5),
         collider=None
     ))
+trees = []
+for pos in [(-44, 0, -4), (-44, 0, 20), (-32, 0, 12), (-35, 0, 20), (-25, 0, -7)]:
+    trees.append(Entity(
+        model='birch_tree.glb',
+        position=pos,
+        scale=(3, 2, 3),
+        collider=None
+    ))
+
 
 house = Entity(
     model='wooden_cottage_house_psx.glb',
