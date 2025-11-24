@@ -147,6 +147,11 @@ car = Entity(
     collider='box',
     scale=(1, .9, 1)
 )
+# --- Text ---
+msg = Text(
+    scale=2,
+    position=(-0.9, 0.5)
+)
 
 # --- Trees ---
 trees = []
@@ -282,9 +287,10 @@ class Enemy(Entity):
     def __init__(self, **kwargs):
         super().__init__(
             parent=shootables_parent,
+            position=pos,
             model='cube',
-            scale_y=2,
-            origin_y=-.5,
+            scale_y=.1,
+            origin_y=-.1,
             color=color.light_gray,
             collider='box',
             **kwargs
@@ -294,7 +300,7 @@ class Enemy(Entity):
             y=1.2,
             model='cube',
             color=color.red,
-            world_scale=(1.5, .1, .1)
+            world_scale=(.1, .1, .1)
         )
         self.max_hp = 100
         self._hp = self.max_hp
@@ -375,6 +381,8 @@ def update():
         if on_top and player.grounded:
             # move player together with block
             player.x += block_dirs[i]
+
+    msg.text = f"Youre position is: x = {int(player.x)}, y = {int(player.y)}, z = {int(player.z)}"
 
     # Walking sound
     walking = held_keys['a'] or held_keys['d'] or held_keys['w'] or held_keys['s']
