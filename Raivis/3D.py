@@ -52,62 +52,102 @@ class Gun(Entity):
             **kwargs
         )
 
+        # === Shooting system ===
         self.on_cooldown = False
         self.cooldown_time = 0.12
         self.recoil_amount = 4
 
-        # store original rotation_z so we can reset recoil cleanly
+        self.mag_size = 30        # bullets per mag
+        self.mag = self.mag_size  # current mag
+        self.reserve = 120        # bullets left in inventory
+        self.reloading = False
+
         self._orig_rotation_z = self.rotation_z
 
-        # Barrel offset relative to gun model
-        self.barrel_offset = Vec3(0.9, 0.9, 2)
+        # Barrel offset
+        self.barrel_offset = Vec3(1.5, 3.7, 5.5)
 
         self.muzzle_flash = Entity(
             parent=self,
             model='quad',
             color=color.yellow,
-            world_scale=0.45,
+            world_scale=0.03,
             enabled=False,
             position=self.barrel_offset
         )
 
-        # simple Audio-based gunshot
         self.gunshot = Audio('single-gunshot-54-40780.mp3',
                              volume=0.8, autoplay=False)
 
-    # ----------------------------------------------
+    # ---------------------------
+    # RELOAD
+    # ---------------------------
+    def reload(self):
+        if self.reloading:
+            return
+        if self.mag == self.mag_size:
+            return
+        if self.reserve <= 0:
+            return
+
+        self.reloading = True
+        reload_sound.play()
+
+        # Delay to simulate reload animation (1.2 sec)
+        invoke(self._finish_reload, delay=1.2)
+
+    def _finish_reload(self):
+        missing = self.mag_size - self.mag
+        to_load = min(missing, self.reserve)
+
+        self.mag += to_load
+        self.reserve -= to_load
+
+        self.reloading = False
+        update_ammo_ui()
+
+    # ---------------------------
     # SHOOT
-    # ----------------------------------------------
+    # ---------------------------
     def shoot(self):
+        if self.reloading:
+            return
+
+        if self.mag <= 0:
+            empty_click.play()
+            print("Out of ammo! Press 'R' to reload.")
+            return
 
         if self.on_cooldown:
             return
 
+        # consume ammo
+        self.mag -= 1
+        update_ammo_ui()
+
         self.on_cooldown = True
 
-        # Sound
-        if self.gunshot:  # play if available
-            try:
-                self.gunshot.play()
-            except Exception:
-                pass
+        # sound
+        try:
+            self.gunshot.play()
+        except:
+            pass
 
         # Flash
         self.muzzle_flash.enabled = True
         invoke(self.muzzle_flash.disable, delay=0.05)
 
-        # Recoil (random horizontal kick)
+        # recoil
         self.rotation_z += random.uniform(-self.recoil_amount,
                                           self.recoil_amount)
-        # reset to original rotation after short delay
         invoke(lambda: setattr(self, 'rotation_z',
                self._orig_rotation_z), delay=0.1)
 
-        # Raycast from the gun barrel (use world_position + offsets)
+        # Raycast
         barrel_world = self.world_position + self.up * \
             self.barrel_offset.y + self.forward * self.barrel_offset.z
         hit = raycast(camera.world_position, camera.forward,
-                      distance=200, ignore=(player, gun))
+                      distance=200, ignore=(player, self))
 
         if hit.hit and hasattr(hit.entity, "hp"):
             hit.entity.hp -= 10
@@ -124,7 +164,18 @@ class Gun(Entity):
 shootables_parent = Entity()
 mouse.traverse_target = shootables_parent
 
-# --- Audio ---
+# --- Gun / Ammo Sounds ---
+
+
+def update_ammo_ui():
+    ammo_text.text = f"{gun.mag} / {gun.reserve}"
+
+
+# --- Gun / Ammo Sounds ---
+empty_click = Audio('empty_bullet.mp3', volume=5, autoplay=False)
+reload_sound = Audio('mag-reload-81594.mp3', volume=5, autoplay=False)
+
+# --- Player Sounds ---
 walk = Audio('walking-sound-effect.mp3', volume=1, autoplay=False, loop=False)
 jump_sound = Audio('jumplanding.mp3', volume=1, autoplay=False, loop=False)
 hit_sound = Audio('080998_bullet-hit-39870.mp3',
@@ -151,6 +202,13 @@ car = Entity(
 msg = Text(
     scale=2,
     position=(-0.9, 0.5)
+)
+ammo_text = Text(
+    text="30 / 120",
+    scale=2,
+    position=(0.72, -0.45),   # lower-right
+    origin=(0, 0),
+    color=color.white
 )
 
 # --- Trees ---
@@ -219,7 +277,7 @@ for i in range(9):
     b = Entity(
         model='cube',
         position=(8, 1 + i, 8 + 5 * i),
-        texture='white_cube',
+        texture='painted_concrete_diff_2k.jpg',
         collider='box',
         scale=(5, 0.5, 5)
     )
@@ -288,16 +346,16 @@ class Enemy(Entity):
         super().__init__(
             parent=shootables_parent,
             position=pos,
-            model='cube',
-            scale_y=.1,
-            origin_y=-.1,
+            model='gnawty_-_donkey_kong_64_enemy.glb',
+            scale_y=.9,
+            origin_y=-.54,
             color=color.light_gray,
             collider='box',
             **kwargs
         )
         self.health_bar = Entity(
             parent=self,
-            y=1.2,
+            y=3,
             model='cube',
             color=color.red,
             world_scale=(.1, .1, .1)
@@ -345,11 +403,11 @@ class Enemy(Entity):
             self.collider = None
             self.enabled = False
             destroy(self, delay=.05)
-            return
-
         self.health_bar.world_scale_x = self.hp / self.max_hp * 1.5
         self.health_bar.alpha = 1
 
+
+# Spawn Enemies
 
 # Spawn Enemies
 enemies = [Enemy(x=x * 4) for x in range(4)]
@@ -395,7 +453,7 @@ def update():
         jump_sound.play()
 
     # Shooting
-    if held_keys['left mouse']:
+    if held_keys['left mouse'] and not gun.reloading:
         gun.shoot()
 
 
@@ -419,6 +477,9 @@ pause_handler = Entity(ignore_paused=True, input=pause_input)
 def input(key):
     if key == 'q':
         quit()
+
+    if key == 'r':
+        gun.reload()
 
 
 app.run()
