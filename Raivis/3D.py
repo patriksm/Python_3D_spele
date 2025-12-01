@@ -519,8 +519,8 @@ def update():
             ammo_pickups.remove(box)
 
 
-AmmoBox(position=(5, 0, 5), amount=30)
-AmmoBox(position=(10, 0, 3), amount=45)
+AmmoBox(position=(-46, 0, -22), amount=120)
+AmmoBox(position=(-46, 0, -28), amount=120)
 
 
 # ======================================================
