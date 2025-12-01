@@ -1,6 +1,8 @@
 from random import choice, uniform
 from ursina import *
 from ursina.prefabs.first_person_controller import FirstPersonController
+from classes.Target import Target
+from classes.Gun import Gun
 
 wall_height = 30
 ground_size = 100
@@ -51,33 +53,34 @@ for i in range(5):
     CreateRandomTree(r=uniform(1, 2), x=uniform(-spawn_area/2, spawn_area/2), y=uniform(-spawn_area/2, 0))
 
 player = FirstPersonController(
-    height=2
+    height = 2,
+    collider = 'box'
 )
+
 player.cursor.visible = True
 
 player.walk_sound = Audio(
     'assets\sounds\sound_walking01.mp3',
     loop=True,
     autoplay=False,
-    volume=.4
+    volume=.2
 )
 
 player.jump_sound = Audio(
     'assets\sounds\sound_jump.mp3',
     loop=False,
     autoplay=False,
-    volume=.4
+    volume=.2
 )
 
 blocks = []
 for i in range(7):
-    r = uniform(-2, 2)
     block = Entity(
         model = 'cube',
-        position = (0, 1 + i, 10 + platform_scale*i),
+        position = (0, 1.1 + i, 10 + platform_scale*i),
         texture = 'white_cube',
         collider = 'box',
-        scale = (platform_scale, 0.5, platform_scale)
+        scale = (platform_scale, 0.5, platform_scale),
     )
     block.speed = uniform(0.5, 0.8)
     block.direction = choice([direction, -direction])
@@ -85,11 +88,24 @@ for i in range(7):
 
 sky = Sky()
 
+targets = []
+for i in range(7):
+    target = Target(uniform(-20, 20), 1, uniform(-20, 20))
+    targets.append(target)
+
+cow = Entity(
+    model="/assets/models/cow.glb",
+    position=(5, 0, 5),
+    scale=(1, 1, 1),
+)
+
+gun = Gun(parent=camera)
+
 def update():
+    shooting()
     moveBlocks()
     walking()
     jumping()
-
 
 def moveBlocks():
     for block in blocks:
@@ -100,9 +116,10 @@ def moveBlocks():
             block.direction = direction
 
         #check collision with block entitiy and apply movement direction to player.
-        ray = raycast(player.position, Vec3(0,-1,0), distance=1, ignore=[player])
-        if ray.hit and ray.entity == block:
-            player.x += ray.entity.direction * ray.entity.speed
+        intersect_info = block.intersects()
+
+        if intersect_info.hit and intersect_info.entity == player:
+            player.x += block.speed * block.direction
 
 def walking():
     walking = held_keys['a'] or held_keys['s'] or held_keys['d'] or held_keys['w']
@@ -121,6 +138,11 @@ def jumping():
     else:
         if player.jump_sound.playing:
             player.jump_sound.stop()
+
+def shooting():
+    shoot = held_keys['left mouse']
+    if shoot and not gun.shooting:
+        gun.set_recoil()
 
 def input(key):
     if(key == "q"):

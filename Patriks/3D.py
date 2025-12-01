@@ -52,19 +52,11 @@ siena_prieksa = Entity(
     texture_scale=(3.6, 0.72),
 )
 
-masina = Entity(
-    model='redCar.glb',
-    position=(-40, 0, 10),
-    collider='box',
-    scale=(2, 2, 2),
+msg = Text(
+    scale = 2,
+    position = (-0.9, 0.5)
 )
 
-masina = Entity(
-    model='redCar.glb',
-    position=(0, 0, 10),
-    collider='box',
-    scale=(2, 2, 2),
-)
 bloki = []
 directions = []
 for i in range(10):
@@ -116,6 +108,8 @@ def update():
         if bloks.intersects().hit:
             player.x -= directions[i] * time.dt
         i += 1
+
+    msg.text = f"Your Position is: x = {int(player.x)}, y = {int(player.y)}, z = {int(player.z)}"
 
     walking = held_keys['a'] or held_keys['d'] or held_keys['w'] or held_keys['s']
     if walking:
