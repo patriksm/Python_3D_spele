@@ -5,6 +5,7 @@ from ursina.prefabs.first_person_controller import FirstPersonController
 
 
 app = Ursina()
+ammo_pickups = []
 
 # Configuration
 WALL_HEIGHT = 8
@@ -79,9 +80,17 @@ class Gun(Entity):
         self.gunshot = Audio('single-gunshot-54-40780.mp3',
                              volume=0.8, autoplay=False)
 
+    def _reload_animation_return(self):
+        # return to normal position + rotation
+        self.animate_position(
+            self.position - Vec3(0, 0.35, -0.1), duration=0.15, curve=curve.in_out_quad)
+        self.animate_rotation(self.rotation - Vec3(-10, 0, 5),
+                              duration=0.15, curve=curve.in_out_quad)
+
     # ---------------------------
     # RELOAD
     # ---------------------------
+
     def reload(self):
         if self.reloading:
             return
@@ -92,6 +101,20 @@ class Gun(Entity):
 
         self.reloading = True
         reload_sound.play()
+
+        # --- RELOAD ANIMATION ---
+    # Move gun Up + tilt
+        self.animate_position(
+            self.position + Vec3(0, 0.35, -0.1), duration=0.18, curve=curve.in_out_quad)
+        self.animate_rotation(self.rotation + Vec3(-10, 0, 5),
+                              duration=0.18, curve=curve.in_out_quad)
+
+    # After animation → return gun to original pose
+        # timing matches reload time
+        invoke(self._reload_animation_return, delay=2)
+
+    # Finish reload logic
+        invoke(self._finish_reload, delay=1.2)
 
         # Delay to simulate reload animation (1.2 sec)
         invoke(self._finish_reload, delay=1.2)
@@ -174,12 +197,15 @@ def update_ammo_ui():
 # --- Gun / Ammo Sounds ---
 empty_click = Audio('empty_bullet.mp3', volume=5, autoplay=False)
 reload_sound = Audio('mag-reload-81594.mp3', volume=5, autoplay=False)
+pickup_sound = Audio('take-it-90781.mp3', autoplay=False, volume=1)
 
 # --- Player Sounds ---
 walk = Audio('walking-sound-effect.mp3', volume=1, autoplay=False, loop=False)
 jump_sound = Audio('jumplanding.mp3', volume=1, autoplay=False, loop=False)
 hit_sound = Audio('080998_bullet-hit-39870.mp3',
                   volume=0.6, autoplay=False, loop=False)
+pickup_sound = Audio('take-it-90781.mp3', autoplay=False, volume=1)
+
 
 # --- Ground ---
 ground = Entity(
@@ -408,14 +434,27 @@ class Enemy(Entity):
 
 
 # Spawn Enemies
-
-# Spawn Enemies
 enemies = [Enemy(x=x * 4) for x in range(4)]
 
+# ======================================================
+
+
+class AmmoBox(Entity):
+    def __init__(self, amount=30, **kwargs):
+        super().__init__(
+            model='ammo_box_-_game_asset.glb',
+            color=color.azure,
+            scale=1,
+            collider='box',
+            **kwargs
+        )
+        self.amount = amount
+        ammo_pickups.append(self)
 
 # ======================================================
 #  UPDATE LOOP
 # ======================================================
+
 
 def update():
     for i, block in enumerate(blocks):
@@ -456,9 +495,36 @@ def update():
     if held_keys['left mouse'] and not gun.reloading:
         gun.shoot()
 
+        # ---- Ammo pickup ----
+    for box in ammo_pickups[:]:
+        if distance(player.position, box.position) < 2:
+
+            # add ammo
+            gun.reserve += box.amount
+
+            # update UI if you use it
+            try:
+                ammo_text.text = f"{gun.mag} / {gun.reserve}"
+            except:
+                pass
+
+            # play sound
+            try:
+                pickup_sound.play()
+            except:
+                print("take-it-90781.mp3")
+
+            # destroy box and remove from list
+            destroy(box)
+            ammo_pickups.remove(box)
+
+
+AmmoBox(position=(5, 0, 5), amount=30)
+AmmoBox(position=(10, 0, 3), amount=45)
+
 
 # ======================================================
-#  PAUSE
+#  PAUSEw
 # ======================================================
 def pause_input(key):
     if key == 'tab':
