@@ -56,13 +56,12 @@ class GameFunctions():
         from classes.Alien import Alien
         from classes.Target import Target
         from classes.Ufo import Ufo
-        match target_name:
-            case "Goose":
-                Goose(x=x, y=y, z=z, on_destroy=on_destroy)
-            case "Alien":
-                Alien(x=x, y=y, z=z, on_destroy=on_destroy)
-            case "Ufo":
-                Ufo(x, y, z, on_destroy=on_destroy)
-            case _:
-                Target(random.uniform(-5, 5), 1, random.uniform(-5, 5), on_destroy)
+        if target_name == "Goose":
+            Goose(x=x, y=y, z=z, on_destroy=on_destroy)
+        elif target_name == "Alien":
+            Alien(x=x, y=y, z=z, on_destroy=on_destroy)
+        elif target_name == "Ufo":
+            Ufo(x, y, z, on_destroy=on_destroy)
+        else:
+            Target(random.uniform(-5, 5), 1, random.uniform(-5, 5), on_destroy)
 
