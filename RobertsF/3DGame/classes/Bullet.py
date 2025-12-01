@@ -1,4 +1,5 @@
 from ursina import *
+from classes.Target import Target
 
 class Bullet(Entity):
     def __init__(self, parent, position):
@@ -8,9 +9,12 @@ class Bullet(Entity):
             color = color.hex("#30a8db"),
             position = position,
             rotation = (0, 0, 0),
-            scale=50
+            scale=50,
+            collider='box'
         )
         self.world_parent = scene
+
+        self.target_hit = False
 
         # Cast a ray from the camera to the cursor
         hit_info = raycast(camera.world_position, camera.forward, distance=1000, ignore=[self, parent])
@@ -21,7 +25,7 @@ class Bullet(Entity):
         else: # if nothing is hit - set target to very far positioned camera
             target_point = camera.world_position + camera.forward * 1000
 
-        self.velocity = (target_point - self.position).normalized() * 20 
+        self.velocity = (target_point - self.position).normalized() * 40 
         invoke(destroy, self, delay=2)
 
     def find_target(self):
@@ -29,4 +33,20 @@ class Bullet(Entity):
         return hit_info if hit_info else None
 
     def update(self):
+        if self.target_hit:
+            return
+
         self.position += self.velocity * time.dt
+
+        # Check collision
+        hit = self.intersects()
+        if hit.hit:
+            target = hit.entity
+            if target and isinstance(target, Target):
+                target.take_damage(50)
+
+            self.target_hit = True
+            invoke(self.destroy_bullet, delay=0.05)
+
+    def destroy_bullet(self):
+        destroy(self)
