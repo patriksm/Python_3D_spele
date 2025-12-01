@@ -1,148 +1,60 @@
 from random import choice, uniform
 from ursina import *
-from ursina.prefabs.first_person_controller import FirstPersonController
-from classes.Target import Target
 from classes.Gun import Gun
-
-wall_height = 30
-ground_size = 100
-spawn_area = (ground_size - 20)
-wall_texture = 'assets/wall/brick_crosswalk_diff_2k.jpg'
-jabami_tree_path = "assets/models/jabami_tree_v3.glb"
+from classes.Environment import Environment
+from classes.Player import Player
+from classes.GameFunctions import GameFunctions
+from classes.Ufo import Ufo
 
 direction = 0.06
 platform_scale = 3
+destroyed_targets_count = 0
 
 app = Ursina()
-
-ground = Entity(
-    model='plane',
-    texture='grass',
-    collider='mesh',
-    scale=(ground_size, 1, ground_size)
-)
-
-def CreateWall(position, scale, texture):
-    return Entity(
-        model='cube',
-        collider='box',
-        position=position,
-        scale=scale,
-        texture=texture,
-        texture_scale=(5, 2.5)
-    )
-
-wall_F = CreateWall((0, wall_height/2, ground_size/2), (ground_size, wall_height, 1), wall_texture)
-wall_B = CreateWall((0, wall_height/2, -ground_size/2), (ground_size, wall_height, 1), wall_texture)
-wall_R = CreateWall((-ground_size/2, wall_height/2, 0), (1, wall_height, ground_size), wall_texture)
-wall_L = CreateWall((ground_size/2, wall_height/2, 0), (1, wall_height, ground_size), wall_texture)
-
-def CreateTree(position, scale, model = jabami_tree_path):
-    tree = Entity(
-        model=model,
-        position=position,
-        scale=scale,
-    )
-    # apply custom collider for tree trunk
-    Entity(parent=tree, position=(0,0.5,0), scale=(0.3,4,0.3), collider='box')
-
-def CreateRandomTree(r, x, y, model = jabami_tree_path):
-    CreateTree(position=(x, -.2, y), scale=(r, r, r), model=model)
-
-for i in range(5):
-    CreateRandomTree(r=uniform(1, 2), x=uniform(-spawn_area/2, spawn_area/2), y=uniform(-spawn_area/2, 0))
-
-player = FirstPersonController(
-    height = 2,
-    collider = 'box'
-)
-
-player.cursor.visible = True
-
-player.walk_sound = Audio(
-    'assets\sounds\sound_walking01.mp3',
-    loop=True,
-    autoplay=False,
-    volume=.2
-)
-
-player.jump_sound = Audio(
-    'assets\sounds\sound_jump.mp3',
-    loop=False,
-    autoplay=False,
-    volume=.2
-)
 
 blocks = []
 for i in range(7):
     block = Entity(
         model = 'cube',
         position = (0, 1.1 + i, 10 + platform_scale*i),
-        texture = 'white_cube',
+        texture = "assets/floor/weathered_planks_diff_2k.jpg",
         collider = 'box',
         scale = (platform_scale, 0.5, platform_scale),
+        texture_scale=(1, 1)
     )
     block.speed = uniform(0.5, 0.8)
     block.direction = choice([direction, -direction])
     blocks.append(block)
 
-sky = Sky()
 
-targets = []
-for i in range(7):
-    target = Target(uniform(-20, 20), 1, uniform(-20, 20))
-    targets.append(target)
+message = Text(
+        text=f"Targets destroyed: {destroyed_targets_count}",
+        scale=1,
+        font='assets/font/Game_Font.ttf',
+        position = (-.88, .47)
+    )
 
-cow = Entity(
-    model="/assets/models/cow.glb",
-    position=(5, 0, 5),
-    scale=(1, 1, 1),
-)
+environment = Environment()
+player = Player()
+game_functions = GameFunctions(player=player, blocks=blocks, environment=environment, message=message)
+game_functions.spawn_targets()
 
 gun = Gun(parent=camera)
 
+cow = Entity(
+    model="/assets/models/cow.glb",
+    position=(30, 0, 5),
+    scale=1.5,
+    rotation=(0, 180, 0),
+    collider='mesh'
+)
+
 def update():
-    shooting()
-    moveBlocks()
-    walking()
-    jumping()
-
-def moveBlocks():
-    for block in blocks:
-        block.x += block.direction * block.speed
-        if block.x >= 10:
-            block.direction = -direction
-        elif block.x <= -10:
-            block.direction = direction
-
-        #check collision with block entitiy and apply movement direction to player.
-        intersect_info = block.intersects()
-
-        if intersect_info.hit and intersect_info.entity == player:
-            player.x += block.speed * block.direction
-
-def walking():
-    walking = held_keys['a'] or held_keys['s'] or held_keys['d'] or held_keys['w']
-    if walking:
-        if not player.walk_sound.playing:
-            player.walk_sound.play()
-    else:
-        if player.walk_sound.playing:
-           player.walk_sound.stop()
-
-def jumping():
-    jumping = held_keys['space']
-    if jumping:
-        if not player.jump_sound.playing:
-            player.jump_sound.play()
-    else:
-        if player.jump_sound.playing:
-            player.jump_sound.stop()
-
-def shooting():
-    shoot = held_keys['left mouse']
-    if shoot and not gun.shooting:
-        gun.set_recoil()
+    environment.update()
+    gun.shooting()
+    game_functions.moveBlocks()
+    player.set_walking()
+    player.set_jumping()
 
 def input(key):
     if(key == "q"):
