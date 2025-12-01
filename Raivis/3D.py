@@ -518,7 +518,7 @@ def update():
             destroy(box)
             ammo_pickups.remove(box)
 
-
+# Inside the house
 AmmoBox(position=(-46, 0, -22), amount=120)
 AmmoBox(position=(-46, 0, -28), amount=120)
 
